@@ -1,0 +1,9 @@
+name: ai_packages_for_flutter
+
+packages:
+  - packages/**
+  - apps/**
+
+scripts:
+  analyze:
+    exec: dart analyze .
