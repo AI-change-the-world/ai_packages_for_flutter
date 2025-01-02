@@ -10,7 +10,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  markdown_widget: ^2.3.2+6
 
 dev_dependencies:
   flutter_test:

@@ -10,11 +10,23 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  ai_packages_core: ^0.0.1  
+  path_provider: ^2.1.5
+  isar: 
+    version: 3.1.8
+    hosted: https://pub.isar-community.dev/
+  isar_flutter_libs: 
+    version: 3.1.8
+    hosted: https://pub.isar-community.dev/
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.13 # dart run build_runner build
+  isar_generator: 
+    version: 3.1.8
+    hosted: https://pub.isar-community.dev/
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

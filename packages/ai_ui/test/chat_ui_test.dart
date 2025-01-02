@@ -1,14 +1,12 @@
-import 'package:ai_ui/ai_ui.dart';
-import 'package:flutter/material.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
-import 'package:uuid/v4.dart';
+import 'package:ai_ui/src/chat_ui.dart';
+import 'package:flutter/material.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   Stream<ChatResponse> fetchResponseStream(String input) async* {
-    ChatResponse chatResponse =
-        ChatResponse(uuid: UuidV4().generate(), stage: "waiting...");
+    ChatResponse chatResponse = ChatResponse(uuid: "123", stage: "waiting...");
     // 模拟流式数据返回
     for (var i = 0; i < 5; i++) {
       await Future.delayed(Duration(seconds: 1));

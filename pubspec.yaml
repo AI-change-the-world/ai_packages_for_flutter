@@ -4,3 +4,4 @@ environment:
   sdk: '>=3.0.0 <4.0.0'
 dev_dependencies:
   melos: ^6.2.0
+  build_runner: ^2.4.13 # dart run build_runner build

@@ -1,0 +1,3 @@
+dependency_overrides:
+  ai_packages_core:
+    path: ../ai_packages_core
