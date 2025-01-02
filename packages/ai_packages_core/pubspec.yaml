@@ -1,7 +1,7 @@
 name: ai_packages_core
-description: "A new Flutter package project."
+description: "core of these project."
 version: 0.0.1
-homepage:
+homepage: https://github.com/AI-change-the-world/ai_packages_for_flutter
 
 environment:
   sdk: ^3.6.0
@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  markdown_widget: ^2.3.2+6
 
 dev_dependencies:
   flutter_test:

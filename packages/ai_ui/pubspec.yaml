@@ -1,7 +1,7 @@
 name: ai_ui
-description: "A new Flutter package project."
+description: "flutter ai ui components"
 version: 0.0.1
-homepage:
+homepage: https://github.com/AI-change-the-world/ai_packages_for_flutter
 
 environment:
   sdk: ^3.6.0
@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   flutter:
-    sdk: flutter
+    sdk: flutter    
 
 dev_dependencies:
   flutter_test:
