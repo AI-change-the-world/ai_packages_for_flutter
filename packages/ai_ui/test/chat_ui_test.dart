@@ -26,6 +26,7 @@ class MyApp extends StatelessWidget {
         onChat: (input) {
           return fetchResponseStream(input);
         },
+        onChatDone: (map) {},
       ),
     );
   }

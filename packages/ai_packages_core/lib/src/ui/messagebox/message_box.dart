@@ -8,4 +8,11 @@ abstract class MessageBox<T> {
   MessageBox({required this.content, required this.stage});
 
   Widget toWidget();
+
+  Map<String, dynamic> toMap(String chatRole) {
+    return {
+      'content': content,
+      'chatRole': chatRole,
+    };
+  }
 }

@@ -11,6 +11,16 @@ class MessageStateController {
     state.dispose();
   }
 
+  MessageBox? getByUuid(String uuid) {
+    return state.value.messages
+        .where((element) => element is ResponseMessageBox && element.id == uuid)
+        .firstOrNull;
+  }
+
+  MessageBox? getLastMessage() {
+    return state.value.messages.lastOrNull;
+  }
+
   void setLoading(bool b) {
     if (b == state.value.isLoading) return;
     state.value = state.value.copyWith(isLoading: b);

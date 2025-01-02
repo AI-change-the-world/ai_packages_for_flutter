@@ -2,7 +2,18 @@ import 'package:isar/isar.dart';
 
 part 'chat_history.g.dart';
 
-enum ChatRole { system, user, assistant }
+enum ChatRole {
+  system(name: "system"),
+  user(name: "user"),
+  assistant(name: "assistant");
+
+  final String name;
+
+  const ChatRole({required this.name});
+  static ChatRole fromName(String name) {
+    return ChatRole.values.firstWhere((element) => element.name == name);
+  }
+}
 
 @collection
 class ChatHistory {

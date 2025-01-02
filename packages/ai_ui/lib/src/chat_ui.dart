@@ -7,10 +7,12 @@ import 'messagebox/llm_request_message_box.dart';
 import 'messagebox/state.dart';
 
 typedef OnChat = Stream<ChatResponse> Function(String input);
+typedef OnChatDone = void Function(Map<String, dynamic>? map);
 
 class ChatUi extends StatefulWidget {
-  const ChatUi({super.key, required this.onChat});
+  const ChatUi({super.key, required this.onChat, required this.onChatDone});
   final OnChat onChat;
+  final OnChatDone onChatDone;
 
   @override
   State<ChatUi> createState() => _ChatUiState();
@@ -61,12 +63,17 @@ class _ChatUiState extends State<ChatUi> {
     if (state.isLoading) {
       return;
     }
+    final RequestMessageBox messageBox =
+        RequestMessageBox(content: s, stage: "waiting...");
 
-    messageStateController
-        .addMessageBox(RequestMessageBox(content: s, stage: "waiting..."));
+    messageStateController.addMessageBox(messageBox);
+    widget.onChatDone(messageBox.toMap("user"));
 
     widget.onChat(s).listen((event) {
       messageStateController.updateMessageBox(event);
+    }).onDone(() {
+      widget.onChatDone(
+          messageStateController.getLastMessage()?.toMap("assistant"));
     });
   }
 }
