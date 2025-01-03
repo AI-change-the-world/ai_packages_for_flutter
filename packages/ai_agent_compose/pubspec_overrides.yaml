@@ -1,0 +1,5 @@
+dependency_overrides:
+  ai_packages_core:
+    path: ../ai_packages_core
+  flow_compose:
+    path: D:/github_repo/fishbone

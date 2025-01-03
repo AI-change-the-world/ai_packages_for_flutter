@@ -10,6 +10,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  ai_packages_core: ^0.0.1  
+  flow_compose: ^0.0.1+5
+  dropdown_button2: ^2.3.9
+  riverpod: ^2.6.1
+  flutter_riverpod: ^2.6.1
 
 dev_dependencies:
   flutter_test:

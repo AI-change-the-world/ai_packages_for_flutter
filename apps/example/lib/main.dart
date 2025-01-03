@@ -1,3 +1,4 @@
+import 'package:ai_agent_compose/ai_agent_compose.dart';
 import 'package:ai_ui/ai_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
@@ -38,6 +39,17 @@ class MyApp extends StatelessWidget {
   }
 }
 
+class MyApp2 extends StatelessWidget {
+  const MyApp2({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: AgentComposer(),
+    );
+  }
+}
+
 void main() {
-  runApp(const MyApp());
+  runApp(const MyApp2());
 }

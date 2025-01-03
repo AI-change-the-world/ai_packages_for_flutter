@@ -11,3 +11,14 @@ class HexColor extends Color {
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
 }
+
+class PromptUtils {
+  static bool promptValidator(String inputKey, String prompt) {
+    return prompt.isEmpty || prompt.contains("{{$inputKey}}");
+  }
+
+  static bool multiplePromptValidator(String prompt, List<String> inputKeys) {
+    return prompt.isEmpty ||
+        inputKeys.every((element) => prompt.contains("{{$element}}"));
+  }
+}

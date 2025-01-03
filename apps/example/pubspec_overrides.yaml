@@ -1,6 +1,10 @@
 # melos_managed_dependency_overrides: ai_packages_core,ai_ui
-dependency_overrides:
-  ai_packages_core:
-    path: ../../packages/ai_packages_core
-  ai_ui:
+dependency_overrides: 
+  ai_ui: 
     path: ../../packages/ai_ui
+  ai_packages_core: 
+    path: ../../packages/ai_packages_core
+  ai_agent_compose:
+    path: ../../packages/ai_agent_compose
+  flow_compose:
+    path: D:/github_repo/fishbone
