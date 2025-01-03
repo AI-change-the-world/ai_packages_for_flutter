@@ -28,3 +28,4 @@ doc/api/
 *.iml
 
 .idea/
+.vscode/
