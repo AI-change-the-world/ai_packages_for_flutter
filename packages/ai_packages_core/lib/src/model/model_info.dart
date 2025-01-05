@@ -1,11 +1,15 @@
 part 'enum.dart';
 
-abstract class ModelCallBase<R, S> {
+abstract class ModelCallBase<R, S, T> {
   Stream<String> streamChat(Map<String, dynamic> history);
 
   Future<String> chat(Map<String, dynamic> history);
 
   Future<R> exec(S source);
+
+  T toT();
+
+  fromT(T t);
 }
 
 /// [example]

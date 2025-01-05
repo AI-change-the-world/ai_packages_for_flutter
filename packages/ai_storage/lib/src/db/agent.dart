@@ -1,3 +1,7 @@
+/*
+  智能体编排节点持久化存储
+*/
+
 import 'package:isar/isar.dart';
 
 part 'agent.g.dart';
