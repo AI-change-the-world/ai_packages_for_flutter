@@ -1,0 +1,11 @@
+[package]
+name = "ai_dynamic_function_call"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+deno_core = "0.328.0"
+flutter_rust_bridge = "=2.5.1"
