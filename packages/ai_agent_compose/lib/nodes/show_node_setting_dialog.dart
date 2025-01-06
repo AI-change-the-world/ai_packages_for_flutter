@@ -21,7 +21,7 @@ Future<Map<String, dynamic>?> showNodeSettingDialog(
               context,
               LlmNodeSettingsWidget(
                 availableModels: data?["availableModels"] ?? [],
-                data: data ?? {},
+                node: node,
                 name: name,
               ));
         });

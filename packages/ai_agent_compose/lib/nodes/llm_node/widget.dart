@@ -12,8 +12,17 @@ class _LlmNodeWidgetState extends State<LlmNodeWidget> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onDoubleTap: () {
-        showNodeSettingDialog(context, widget.node);
+      onDoubleTap: () async {
+        Map<String, dynamic>? result =
+            await showNodeSettingDialog(context, widget.node);
+        if (result != null) {
+          setState(() {
+            widget.node.data = result;
+            widget.node.nodeName = result["name"] ?? widget.node.nodeName;
+            widget.node.description =
+                result["description"] ?? widget.node.description;
+          });
+        }
       },
       child: Container(
         padding: const EdgeInsets.all(25),
@@ -23,6 +32,18 @@ class _LlmNodeWidgetState extends State<LlmNodeWidget> {
         ),
         width: widget.node.width,
         height: widget.node.height,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 20,
+          children: [
+            Text(
+              widget.node.nodeName,
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Text(widget.node.description)
+          ],
+        ),
       ),
     );
   }
@@ -33,10 +54,10 @@ class LlmNodeSettingsWidget extends StatefulWidget {
   const LlmNodeSettingsWidget(
       {super.key,
       required this.availableModels,
-      required this.data,
+      required this.node,
       this.name = "节点配置"});
   final List<ModelInfo> availableModels;
-  final Map<String, dynamic> data;
+  final LlmNode node;
   final String name;
 
   @override
@@ -45,20 +66,27 @@ class LlmNodeSettingsWidget extends StatefulWidget {
 
 class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
   late final TextEditingController _outputController = TextEditingController()
-    ..text = widget.data["output"]?.toString() ?? "";
+    ..text = widget.node.data?["output"]?.toString() ?? "";
   late final TextEditingController _promptController = TextEditingController()
-    ..text = widget.data["prompt"]?.toString() ?? "";
+    ..text = widget.node.data?["prompt"]?.toString() ?? "";
   late final TextEditingController _inputController = TextEditingController();
-  late String selectedModel = widget.data["model"]?.toString() ?? "";
-  late List<String> inputs = widget.data["inputs"] ?? [];
+  late String selectedModel = widget.node.data?["model"]?.toString() ?? "";
+  late List<String> inputs = widget.node.data?["inputs"] ?? [];
+  late final TextEditingController _nameController = TextEditingController()
+    ..text = widget.node.nodeName;
+  late final TextEditingController _descriptionController =
+      TextEditingController()..text = widget.node.description;
 
   bool showInput = false;
+  bool promptError = false;
 
   @override
   void dispose() {
     _inputController.dispose();
     _outputController.dispose();
     _promptController.dispose();
+    _nameController.dispose();
+    _descriptionController.dispose();
     super.dispose();
   }
 
@@ -73,15 +101,28 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 10,
             children: [
-              Text("模型选择"),
+              Text("1. 节点名"),
+              TextField(
+                controller: _nameController,
+                decoration: Styles.inputDecoration,
+              ),
+              Text("2. 描述"),
+              TextField(
+                controller: _descriptionController,
+                decoration: Styles.inputDecoration,
+                maxLines: 5,
+              ),
+              Text("3. 模型选择"),
               DropdownButtonFormField2<ModelInfo>(
                 isExpanded: true,
                 decoration: InputDecoration(
-                  // Add Horizontal padding using menuItemStyleData.padding so it matches
-                  // the menu padding when button's width is not specified.
-                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(
+                      color: Color.fromARGB(255, 159, 159, 159),
+                    ),
                   ),
                   // Add more decoration..
                 ),
@@ -126,7 +167,7 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
               ),
               Row(
                 children: [
-                  Text("输入"),
+                  Text("4. 输入 (多输入)"),
                   InkWell(
                     onTap: () {
                       setState(() {
@@ -140,12 +181,68 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                   )
                 ],
               ),
-              Text("输出"),
+              Wrap(
+                runSpacing: 10,
+                spacing: 10,
+                alignment: WrapAlignment.start,
+                children: inputs
+                    .map((e) => Chip(
+                          onDeleted: () {
+                            setState(() {
+                              inputs.remove(e);
+                            });
+                          },
+                          label: Text(e),
+                          deleteIcon: Icon(Icons.delete),
+                        ))
+                    .toList(),
+              ),
+              if (showInput)
+                Row(
+                  spacing: 20,
+                  children: [
+                    Expanded(
+                        child: TextField(
+                      controller: _inputController,
+                      decoration: Styles.inputDecoration,
+                    )),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      onPressed: () {
+                        if (_inputController.text.isEmpty ||
+                            inputs.contains(_inputController.text)) {
+                          return;
+                        }
+                        setState(() {
+                          inputs.add(_inputController.text);
+                          _inputController.clear();
+                        });
+                      },
+                      child: Text("添加"),
+                    ),
+                  ],
+                ),
+              Text("5. 输出 (单输出)"),
               TextField(
                 controller: _outputController,
                 decoration: Styles.inputDecoration,
               ),
-              Text("提示词"),
+              Row(
+                spacing: 10,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text("6. 提示词"),
+                  if (promptError)
+                    Tooltip(
+                      message: "提示词格式错误! 此prompt中未包含一个或多个输入",
+                      child: Icon(Icons.error, color: Colors.red),
+                    )
+                ],
+              ),
               TextField(
                 controller: _promptController,
                 decoration: Styles.inputDecoration,
@@ -166,11 +263,32 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                     ),
                   ),
                   onPressed: () {
+                    if (inputs.isNotEmpty) {
+                      final r = PromptUtils.multiplePromptValidator(
+                          _promptController.text, inputs);
+                      if (!r) {
+                        setState(() {
+                          promptError = true;
+                        });
+                        return;
+                      } else {
+                        setState(() {
+                          promptError = false;
+                        });
+                      }
+                    } else {
+                      setState(() {
+                        promptError = false;
+                      });
+                    }
+
                     Navigator.pop(context, {
                       "output": _outputController.text,
                       "prompt": _promptController.text,
                       "model": selectedModel,
-                      "inputs": inputs
+                      "inputs": inputs,
+                      "name": _nameController.text,
+                      "description": _descriptionController.text,
                     });
                   },
                   child: Text("确定"))

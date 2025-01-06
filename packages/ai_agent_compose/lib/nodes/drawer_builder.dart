@@ -10,7 +10,7 @@ Widget drawerBuilder(BuildContext context, Widget child) {
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: EdgeInsets.all(20),
-          width: 400,
+          width: 300,
           height: MediaQuery.of(context).size.height * 0.95,
           decoration: BoxDecoration(
             color: Colors.white,

@@ -11,10 +11,12 @@ class Styles {
   static Color appColor = Color.fromARGB(255, 132, 142, 209);
 
   static InputDecoration inputDecoration = InputDecoration(
+      isDense: true,
+      // contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
       errorStyle: TextStyle(height: 0),
       hintStyle:
           TextStyle(color: Color.fromARGB(255, 159, 159, 159), fontSize: 12),
-      contentPadding: EdgeInsets.only(left: 10, bottom: 15),
+      contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
       border: InputBorder.none,
       // focusedErrorBorder:
       //     OutlineInputBorder(borderSide: BorderSide(color: Colors.redAccent)),

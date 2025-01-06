@@ -11,7 +11,7 @@ class OpenAIInfo extends ModelCallBase {
 
   OpenAIInfo(this.baseUrl, this.secretKey, this.defaultModel);
 
-  late ChatOpenAI client = ChatOpenAI(
+  late final ChatOpenAI client = ChatOpenAI(
     apiKey: secretKey,
     baseUrl: baseUrl,
     defaultOptions: ChatOpenAIOptions(model: defaultModel),
