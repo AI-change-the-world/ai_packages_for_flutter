@@ -4,9 +4,13 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import '../frb_generated.dart';
+import 'enums.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `eval`
 
 String dynamicJsCall({required String code}) =>
     RustLib.instance.api.crateApiJsCallDynamicJsCall(code: code);
+
+(String, ReturnType) dynamicJsCallWithReturnType({required String code}) =>
+    RustLib.instance.api.crateApiJsCallDynamicJsCallWithReturnType(code: code);

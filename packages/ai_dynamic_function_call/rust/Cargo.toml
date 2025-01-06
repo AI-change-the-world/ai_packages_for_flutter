@@ -7,5 +7,6 @@ edition = "2021"
 crate-type = ["cdylib", "staticlib"]
 
 [dependencies]
-deno_core = "0.328.0"
+deno_core = "=0.328.0"
 flutter_rust_bridge = "=2.5.1"
+pyo3 = { version = "=0.23.3", features = ["auto-initialize"] }

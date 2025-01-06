@@ -1,5 +1,5 @@
 name: ai_dynamic_function_call
-description: "this package is used to execute javascript code from a string via **deno_core**"
+description: "this package is used to execute javascript code from a string via **deno_core*, and python code from via **pyo3*"
 version: 0.0.1
 homepage:
 

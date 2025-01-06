@@ -3,7 +3,9 @@
 
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
+import 'api/enums.dart';
 import 'api/js_call.dart';
+import 'api/py_call.dart';
 import 'api/simple.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -69,7 +71,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.5.1';
 
   @override
-  int get rustContentHash => -2052803603;
+  int get rustContentHash => -941128824;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -82,9 +84,31 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
 abstract class RustLibApi extends BaseApi {
   String crateApiJsCallDynamicJsCall({required String code});
 
+  (String, ReturnType) crateApiJsCallDynamicJsCallWithReturnType(
+      {required String code});
+
+  String crateApiPyCallDynamicPyCall({required PyCallObj pyCall});
+
+  Future<PyResultString> crateApiPyCallPyCallObjExec({required PyCallObj that});
+
+  Future<PyCallObj> crateApiPyCallPyCallObjNew(
+      {required ReturnType returnType,
+      required String functionName,
+      required String script,
+      required List<String> args});
+
   String crateApiSimpleGreet({required String name});
 
   Future<void> crateApiSimpleInitApp();
+
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_PyResultString;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_PyResultString;
+
+  CrossPlatformFinalizerArg
+      get rust_arc_decrement_strong_count_PyResultStringPtr;
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -120,12 +144,119 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  (String, ReturnType) crateApiJsCallDynamicJsCallWithReturnType(
+      {required String code}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_String(code, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_record_string_return_type,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiJsCallDynamicJsCallWithReturnTypeConstMeta,
+      argValues: [code],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiJsCallDynamicJsCallWithReturnTypeConstMeta =>
+      const TaskConstMeta(
+        debugName: "dynamic_js_call_with_return_type",
+        argNames: ["code"],
+      );
+
+  @override
+  String crateApiPyCallDynamicPyCall({required PyCallObj pyCall}) {
+    return handler.executeSync(SyncTask(
+      callFfi: () {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_py_call_obj(pyCall, serializer);
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 3)!;
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_String,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiPyCallDynamicPyCallConstMeta,
+      argValues: [pyCall],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiPyCallDynamicPyCallConstMeta =>
+      const TaskConstMeta(
+        debugName: "dynamic_py_call",
+        argNames: ["pyCall"],
+      );
+
+  @override
+  Future<PyResultString> crateApiPyCallPyCallObjExec(
+      {required PyCallObj that}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_box_autoadd_py_call_obj(that, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 4, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData:
+            sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiPyCallPyCallObjExecConstMeta,
+      argValues: [that],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiPyCallPyCallObjExecConstMeta =>
+      const TaskConstMeta(
+        debugName: "py_call_obj_exec",
+        argNames: ["that"],
+      );
+
+  @override
+  Future<PyCallObj> crateApiPyCallPyCallObjNew(
+      {required ReturnType returnType,
+      required String functionName,
+      required String script,
+      required List<String> args}) {
+    return handler.executeNormal(NormalTask(
+      callFfi: (port_) {
+        final serializer = SseSerializer(generalizedFrbRustBinding);
+        sse_encode_return_type(returnType, serializer);
+        sse_encode_String(functionName, serializer);
+        sse_encode_String(script, serializer);
+        sse_encode_list_String(args, serializer);
+        pdeCallFfi(generalizedFrbRustBinding, serializer,
+            funcId: 5, port: port_);
+      },
+      codec: SseCodec(
+        decodeSuccessData: sse_decode_py_call_obj,
+        decodeErrorData: null,
+      ),
+      constMeta: kCrateApiPyCallPyCallObjNewConstMeta,
+      argValues: [returnType, functionName, script, args],
+      apiImpl: this,
+    ));
+  }
+
+  TaskConstMeta get kCrateApiPyCallPyCallObjNewConstMeta => const TaskConstMeta(
+        debugName: "py_call_obj_new",
+        argNames: ["returnType", "functionName", "script", "args"],
+      );
+
+  @override
   String crateApiSimpleGreet({required String name}) {
     return handler.executeSync(SyncTask(
       callFfi: () {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         sse_encode_String(name, serializer);
-        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 2)!;
+        return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6)!;
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_String,
@@ -148,7 +279,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       callFfi: (port_) {
         final serializer = SseSerializer(generalizedFrbRustBinding);
         pdeCallFfi(generalizedFrbRustBinding, serializer,
-            funcId: 3, port: port_);
+            funcId: 7, port: port_);
       },
       codec: SseCodec(
         decodeSuccessData: sse_decode_unit,
@@ -165,6 +296,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: [],
       );
 
+  RustArcIncrementStrongCountFnType
+      get rust_arc_increment_strong_count_PyResultString => wire
+          .rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString;
+
+  RustArcDecrementStrongCountFnType
+      get rust_arc_decrement_strong_count_PyResultString => wire
+          .rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString;
+
+  @protected
+  PyResultString
+      dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return PyResultStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
+  @protected
+  PyResultString
+      dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return PyResultStringImpl.frbInternalDcoDecode(raw as List<dynamic>);
+  }
+
   @protected
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -172,9 +327,60 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  PyCallObj dco_decode_box_autoadd_py_call_obj(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_py_call_obj(raw);
+  }
+
+  @protected
+  int dco_decode_i_32(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw as int;
+  }
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_String).toList();
+  }
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as Uint8List;
+  }
+
+  @protected
+  PyCallObj dco_decode_py_call_obj(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 4)
+      throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
+    return PyCallObj(
+      returnType: dco_decode_return_type(arr[0]),
+      functionName: dco_decode_String(arr[1]),
+      script: dco_decode_String(arr[2]),
+      args: dco_decode_list_String(arr[3]),
+    );
+  }
+
+  @protected
+  (String, ReturnType) dco_decode_record_string_return_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) {
+      throw Exception('Expected 2 elements, got ${arr.length}');
+    }
+    return (
+      dco_decode_String(arr[0]),
+      dco_decode_return_type(arr[1]),
+    );
+  }
+
+  @protected
+  ReturnType dco_decode_return_type(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return ReturnType.values[raw as int];
   }
 
   @protected
@@ -190,6 +396,30 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt dco_decode_usize(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dcoDecodeU64(raw);
+  }
+
+  @protected
+  PyResultString
+      sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return PyResultStringImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
+  PyResultString
+      sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return PyResultStringImpl.frbInternalSseDecode(
+        sse_decode_usize(deserializer), sse_decode_i_32(deserializer));
+  }
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_prim_u_8_strict(deserializer);
@@ -197,10 +427,64 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  PyCallObj sse_decode_box_autoadd_py_call_obj(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_py_call_obj(deserializer));
+  }
+
+  @protected
+  int sse_decode_i_32(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return deserializer.buffer.getInt32();
+  }
+
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    var len_ = sse_decode_i_32(deserializer);
+    var ans_ = <String>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_String(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var len_ = sse_decode_i_32(deserializer);
     return deserializer.buffer.getUint8List(len_);
+  }
+
+  @protected
+  PyCallObj sse_decode_py_call_obj(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_returnType = sse_decode_return_type(deserializer);
+    var var_functionName = sse_decode_String(deserializer);
+    var var_script = sse_decode_String(deserializer);
+    var var_args = sse_decode_list_String(deserializer);
+    return PyCallObj(
+        returnType: var_returnType,
+        functionName: var_functionName,
+        script: var_script,
+        args: var_args);
+  }
+
+  @protected
+  (String, ReturnType) sse_decode_record_string_return_type(
+      SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_field0 = sse_decode_String(deserializer);
+    var var_field1 = sse_decode_return_type(deserializer);
+    return (var_field0, var_field1);
+  }
+
+  @protected
+  ReturnType sse_decode_return_type(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var inner = sse_decode_i_32(deserializer);
+    return ReturnType.values[inner];
   }
 
   @protected
@@ -215,9 +499,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  int sse_decode_i_32(SseDeserializer deserializer) {
+  BigInt sse_decode_usize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    return deserializer.buffer.getInt32();
+    return deserializer.buffer.getBigUint64();
   }
 
   @protected
@@ -227,9 +511,51 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void
+      sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          PyResultString self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as PyResultStringImpl).frbInternalSseEncode(move: true),
+        serializer);
+  }
+
+  @protected
+  void
+      sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPyResultString(
+          PyResultString self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_usize(
+        (self as PyResultStringImpl).frbInternalSseEncode(move: null),
+        serializer);
+  }
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_u_8_strict(utf8.encoder.convert(self), serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_py_call_obj(
+      PyCallObj self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_py_call_obj(self, serializer);
+  }
+
+  @protected
+  void sse_encode_i_32(int self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    serializer.buffer.putInt32(self);
+  }
+
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_String(item, serializer);
+    }
   }
 
   @protected
@@ -238,6 +564,29 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
     serializer.buffer.putUint8List(self);
+  }
+
+  @protected
+  void sse_encode_py_call_obj(PyCallObj self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_return_type(self.returnType, serializer);
+    sse_encode_String(self.functionName, serializer);
+    sse_encode_String(self.script, serializer);
+    sse_encode_list_String(self.args, serializer);
+  }
+
+  @protected
+  void sse_encode_record_string_return_type(
+      (String, ReturnType) self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_String(self.$1, serializer);
+    sse_encode_return_type(self.$2, serializer);
+  }
+
+  @protected
+  void sse_encode_return_type(ReturnType self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 
   @protected
@@ -252,9 +601,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_i_32(int self, SseSerializer serializer) {
+  void sse_encode_usize(BigInt self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    serializer.buffer.putInt32(self);
+    serializer.buffer.putBigUint64(self);
   }
 
   @protected
@@ -262,4 +611,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint8(self ? 1 : 0);
   }
+}
+
+@sealed
+class PyResultStringImpl extends RustOpaque implements PyResultString {
+  // Not to be used by end users
+  PyResultStringImpl.frbInternalDcoDecode(List<dynamic> wire)
+      : super.frbInternalDcoDecode(wire, _kStaticData);
+
+  // Not to be used by end users
+  PyResultStringImpl.frbInternalSseDecode(BigInt ptr, int externalSizeOnNative)
+      : super.frbInternalSseDecode(ptr, externalSizeOnNative, _kStaticData);
+
+  static final _kStaticData = RustArcStaticData(
+    rustArcIncrementStrongCount:
+        RustLib.instance.api.rust_arc_increment_strong_count_PyResultString,
+    rustArcDecrementStrongCount:
+        RustLib.instance.api.rust_arc_decrement_strong_count_PyResultString,
+    rustArcDecrementStrongCountPtr:
+        RustLib.instance.api.rust_arc_decrement_strong_count_PyResultStringPtr,
+  );
 }
