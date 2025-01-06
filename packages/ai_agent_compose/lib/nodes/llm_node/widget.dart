@@ -35,7 +35,7 @@ class LlmNodeSettingsWidget extends StatefulWidget {
       required this.availableModels,
       required this.data,
       this.name = "节点配置"});
-  final List<String> availableModels;
+  final List<ModelInfo> availableModels;
   final Map<String, dynamic> data;
   final String name;
 
@@ -51,6 +51,8 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
   late final TextEditingController _inputController = TextEditingController();
   late String selectedModel = widget.data["model"]?.toString() ?? "";
   late List<String> inputs = widget.data["inputs"] ?? [];
+
+  bool showInput = false;
 
   @override
   void dispose() {
@@ -72,7 +74,7 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
             spacing: 10,
             children: [
               Text("模型选择"),
-              DropdownButtonFormField2<String>(
+              DropdownButtonFormField2<ModelInfo>(
                 isExpanded: true,
                 decoration: InputDecoration(
                   // Add Horizontal padding using menuItemStyleData.padding so it matches
@@ -88,10 +90,10 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                   style: TextStyle(fontSize: 14),
                 ),
                 items: widget.availableModels
-                    .map((item) => DropdownMenuItem<String>(
+                    .map((item) => DropdownMenuItem<ModelInfo>(
                           value: item,
                           child: Text(
-                            item,
+                            item.modelName,
                             style: const TextStyle(
                               fontSize: 14,
                             ),
@@ -100,7 +102,7 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedModel = value ?? "";
+                    selectedModel = value?.modelName ?? "";
                   });
                 },
                 buttonStyleData: const ButtonStyleData(
@@ -125,9 +127,16 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
               Row(
                 children: [
                   Text("输入"),
-                  Icon(
-                    Icons.add,
-                    size: 24,
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        showInput = !showInput;
+                      });
+                    },
+                    child: Icon(
+                      !showInput ? Icons.add : Icons.cancel,
+                      size: 24,
+                    ),
                   )
                 ],
               ),

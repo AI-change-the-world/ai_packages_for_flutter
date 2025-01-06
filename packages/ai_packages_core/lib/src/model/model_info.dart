@@ -1,15 +1,13 @@
+import 'package:ai_packages_core/src/chat_history/chat_history.dart';
+
 part 'enum.dart';
 
-abstract class ModelCallBase<R, S, T> {
-  Stream<String> streamChat(Map<String, dynamic> history);
+abstract class ModelCallBase<R, S> {
+  Stream<String> streamChat(List<ChatMessage> history);
 
-  Future<String> chat(Map<String, dynamic> history);
+  Future<String> chat(List<ChatMessage> history);
 
   Future<R> exec(S source);
-
-  T toT();
-
-  fromT(T t);
 }
 
 /// [example]
