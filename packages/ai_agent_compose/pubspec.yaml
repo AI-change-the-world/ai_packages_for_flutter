@@ -11,12 +11,14 @@ dependencies:
   flutter:
     sdk: flutter
   ai_packages_core: ^0.0.1  
-  flow_compose: ^0.0.1+5
+  flow_compose: ^0.0.1+7
   dropdown_button2: ^2.3.9
   riverpod: ^2.6.1
   flutter_riverpod: ^2.6.1
+  file_selector: ^1.0.3
   langchain_openai: ^0.7.3
   langchain: ^0.7.7+2
+  drop_down_search_field: ^1.1.1
 
 dev_dependencies:
   flutter_test:

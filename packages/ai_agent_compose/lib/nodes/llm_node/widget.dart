@@ -1,23 +1,31 @@
 part of 'llm_node.dart';
 
-class LlmNodeWidget extends StatefulWidget {
+class LlmNodeWidget extends ConsumerStatefulWidget {
   const LlmNodeWidget({super.key, required this.node});
   final LlmNode node;
 
   @override
-  State<LlmNodeWidget> createState() => _LlmNodeWidgetState();
+  ConsumerState<LlmNodeWidget> createState() => _LlmNodeWidgetState();
 }
 
-class _LlmNodeWidgetState extends State<LlmNodeWidget> {
+class _LlmNodeWidgetState extends ConsumerState<LlmNodeWidget> {
   @override
   Widget build(BuildContext context) {
+    final l = ref.read(workflowProvider.notifier).getAllGlobalInputs();
+    if (widget.node.data?["globalInputs"] == null) {
+      widget.node.data = {"globalInputs": l};
+    } else {
+      widget.node.data!["globalInputs"] = l;
+    }
+
     return GestureDetector(
       onDoubleTap: () async {
         Map<String, dynamic>? result =
             await showNodeSettingDialog(context, widget.node);
         if (result != null) {
+          ref.read(workflowProvider.notifier).addData(widget.node.uuid, result);
           setState(() {
-            widget.node.data = result;
+            widget.node.data!.addAll(result);
             widget.node.nodeName = result["name"] ?? widget.node.nodeName;
             widget.node.description =
                 result["description"] ?? widget.node.description;
@@ -51,11 +59,12 @@ class _LlmNodeWidgetState extends State<LlmNodeWidget> {
 
 /// multiple inputs, single output
 class LlmNodeSettingsWidget extends StatefulWidget {
-  const LlmNodeSettingsWidget(
-      {super.key,
-      required this.availableModels,
-      required this.node,
-      this.name = "节点配置"});
+  const LlmNodeSettingsWidget({
+    super.key,
+    required this.availableModels,
+    required this.node,
+    this.name = "节点配置",
+  });
   final List<ModelInfo> availableModels;
   final LlmNode node;
   final String name;
@@ -76,6 +85,7 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
     ..text = widget.node.nodeName;
   late final TextEditingController _descriptionController =
       TextEditingController()..text = widget.node.description;
+  late List<String> globalInputs = widget.node.data?["globalInputs"] ?? [];
 
   bool showInput = false;
   bool promptError = false;
@@ -199,13 +209,59 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
               ),
               if (showInput)
                 Row(
-                  spacing: 20,
+                  spacing: 10,
                   children: [
+                    // Expanded(
+                    //     child: TextField(
+                    //   controller: _inputController,
+                    //   decoration: Styles.inputDecoration,
+                    // )),
+
                     Expanded(
-                        child: TextField(
-                      controller: _inputController,
-                      decoration: Styles.inputDecoration,
-                    )),
+                      child: DropDownSearchField(
+                          textFieldConfiguration: TextFieldConfiguration(
+                              decoration: Styles.inputDecoration,
+                              controller: _inputController),
+                          itemBuilder: (c, s) {
+                            // return ListTile(
+                            //   leading: Chip(label: Text("全局变量")),
+                            //   title: Text(s),
+                            // );
+                            return SizedBox(
+                              height: 35,
+                              child: Row(
+                                spacing: 5,
+                                children: [
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(5),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: Colors.blueAccent,
+                                    ),
+                                    child: Text(
+                                      "全局变量",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                  Text(s),
+                                ],
+                              ),
+                            );
+                          },
+                          onSuggestionSelected: (suggestion) {
+                            _inputController.text = suggestion;
+                          },
+                          suggestionsCallback: (pattern) {
+                            return globalInputs
+                                .where((e) => e.contains(pattern))
+                                .toList();
+                          },
+                          displayAllSuggestionWhenTap: false,
+                          isMultiSelectDropdown: false),
+                    ),
                     ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         shape: RoundedRectangleBorder(
@@ -224,6 +280,10 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                       },
                       child: Text("添加"),
                     ),
+                    Tooltip(
+                      message: "仅支持全局变量中存在的输入，并且输入不能重复",
+                      child: Icon(Icons.info),
+                    )
                   ],
                 ),
               Text("5. 输出 (单输出)"),

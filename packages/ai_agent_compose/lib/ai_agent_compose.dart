@@ -23,13 +23,40 @@ class _Composer extends ConsumerStatefulWidget {
 }
 
 class __ComposerState extends ConsumerState<_Composer> {
+  late final controller = ref.read(workflowProvider.notifier).controller;
+
   @override
   Widget build(BuildContext context) {
-    final controller = ref.read(workflowProvider.notifier).controller;
-
     return Scaffold(
-        body: InfiniteDrawingBoard(
-      controller: controller,
+        body: Stack(
+      children: [
+        InfiniteDrawingBoard(
+          controller: controller,
+        ),
+        if (ref.watch(workflowProvider.select((c) => c.context.isNotEmpty)))
+          Positioned(
+            right: 20,
+            top: 20,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.greenAccent,
+                backgroundColor: Colors.greenAccent.shade700,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                if (ref.read(workflowProvider.notifier).couldSave()) {
+                  print(controller.dumpToString());
+                }
+              },
+              child: Text(
+                '创建',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          )
+      ],
     ));
   }
 }
