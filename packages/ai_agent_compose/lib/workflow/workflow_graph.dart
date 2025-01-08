@@ -1,15 +1,44 @@
+import 'package:ai_agent_compose/nodes/begin_node/begin_node.dart';
+import 'package:ai_agent_compose/nodes/llm_node/llm_node.dart';
+import 'package:ai_agent_compose/workflow/workflow_notifier.dart';
 import 'package:flow_compose/flow_compose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'workflow_notifier.dart';
+extension PromptFormat on String {
+  String formatWithMap(Map<String, dynamic> map) {
+    String result = this;
+    map.forEach((key, value) {
+      result = result.replaceAll('{{$key}}', value.toString());
+    });
+    return result;
+  }
+}
 
 extension Excuter on INode {
   Future<void> execute(WidgetRef ref) async {
     // 执行节点逻辑
     debugPrint('Executing node: $label ===> $data');
-    ref.read(workflowProvider.notifier).changeCurrentNode(this);
+    if (this is BeginNode) {
+      /// 开始节点的执行逻辑
+      /// 将所有的 inputs 塞到全局变量中
+      for (final Map<String, dynamic> i in data?['inputs'] ?? []) {
+        // TODO 支持上传文件的逻辑
+        ref
+            .read(workflowProvider.notifier)
+            .addToGlobal(i['key'] ?? "", i['content'] ?? "");
+      }
+    }
+
+    if (this is LlmNode) {
+      print("data?['prompt']  ${data?['prompt']}");
+      final prompt = ((data?['prompt'] ?? "") as String)
+          .formatWithMap(ref.read(workflowProvider.notifier).getGlobal());
+      print("prompt  ${prompt}");
+    }
+
     await Future.delayed(Duration(seconds: 3));
+    debugPrint('Node executed done: ${ref.read(workflowProvider).context}');
   }
 }
 
@@ -49,7 +78,18 @@ class WorkflowGraph {
       final node = nodes.firstWhere((n) => n.uuid == nodeId);
       await node.execute(ref);
     }
-    ref.read(workflowProvider.notifier).changeCurrentNode(null);
+  }
+
+  Stream executeWorkflowInStream() async* {
+    // 拓扑排序
+    final executionOrder = _topologicalSort();
+    debugPrint('Execution order: $executionOrder');
+    if (executionOrder == null) {
+      throw Exception('Workflow is not a DAG!');
+    }
+
+    // 按顺序执行节点
+    /// TODO: 添加流支持
   }
 
   List<String>? _topologicalSort() {

@@ -1,4 +1,5 @@
 import 'package:ai_agent_compose/nodes/show_node_setting_dialog.dart';
+import 'package:ai_agent_compose/nodes/simple_tag.dart';
 import 'package:ai_agent_compose/workflow/workflow_notifier.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:drop_down_search_field/drop_down_search_field.dart';

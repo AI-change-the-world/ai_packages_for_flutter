@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:ai_agent_compose/ai_agent_compose.dart';
 import 'package:ai_ui/ai_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_packages_core/ai_packages_core.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/v4.dart';
 
 class MyApp extends StatelessWidget {
@@ -42,10 +45,43 @@ class MyApp extends StatelessWidget {
 class MyApp2 extends StatelessWidget {
   const MyApp2({super.key});
 
+  Future<Map<String, String>> loadConfig() async {
+    try {
+      // 读取 JSON 文件内容
+      final String response = await rootBundle.loadString('assets/config.json');
+      // 解析 JSON 数据
+      final data = jsonDecode(response);
+      return data;
+    } catch (e) {
+      return {};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: AgentComposer(),
+      home: FutureBuilder(
+          future: loadConfig(),
+          builder: (c, s) {
+            if (s.hasData) {
+              final data = s.data as Map<String, String>;
+              String sk = data['llm-sk'] ?? "";
+              String model = data['llm-model-name'] ?? "";
+              String baseUrl = data['llm-base'] ?? "";
+              OpenAIInfo openAIInfo = OpenAIInfo(baseUrl, sk, model);
+              ModelInfo modelInfo = ModelInfo(
+                ModelType.openai,
+                ModelFor.nlp,
+                "default",
+                openAIInfo,
+              );
+              return AgentComposer(
+                models: [modelInfo],
+              );
+            } else {
+              return Scaffold();
+            }
+          }),
     );
   }
 }

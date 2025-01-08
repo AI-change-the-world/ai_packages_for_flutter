@@ -14,7 +14,7 @@ class _BeginNodeWidgetState extends ConsumerState<BeginNodeWidget> {
     return GestureDetector(
       onDoubleTap: () async {
         final Map<String, dynamic>? d =
-            await showNodeSettingDialog(context, widget.node);
+            await showNodeSettingDialog(context, widget.node, ref);
         if (d != null) {
           ref.read(workflowProvider.notifier).addData(widget.node.uuid, d);
           widget.node.data = d;
@@ -47,6 +47,17 @@ class BeginNodeConfigWidget extends StatefulWidget {
 
   @override
   State<BeginNodeConfigWidget> createState() => _BeginNodeConfigWidgetState();
+}
+
+extension AddIfExists on List<Input> {
+  void addIfExists(Input input) {
+    if (!contains(input)) {
+      add(input);
+    } else {
+      remove(input);
+      add(input);
+    }
+  }
 }
 
 class _BeginNodeConfigWidgetState extends State<BeginNodeConfigWidget> {
@@ -100,14 +111,24 @@ class _BeginNodeConfigWidgetState extends State<BeginNodeConfigWidget> {
                   spacing: 10,
                   alignment: WrapAlignment.start,
                   children: inputs
-                      .map((e) => Chip(
-                            label: Text(e.key!),
-                            deleteIcon: Icon(Icons.delete),
-                            onDeleted: () {
+                      .map((e) => InkWell(
+                            onTap: () {
                               setState(() {
-                                inputs.remove(e);
+                                showInput = true;
+                                inputType = e.type;
+                                _inputController.text = e.key!;
+                                _contentController.text = e.content ?? "";
                               });
                             },
+                            child: Chip(
+                              label: Text(e.key!),
+                              deleteIcon: Icon(Icons.delete),
+                              onDeleted: () {
+                                setState(() {
+                                  inputs.remove(e);
+                                });
+                              },
+                            ),
                           ))
                       .toList(),
                 ),
@@ -239,7 +260,7 @@ class _BeginNodeConfigWidgetState extends State<BeginNodeConfigWidget> {
                                         _inputController.text.isEmpty) {
                                       return;
                                     }
-                                    inputs.add(Input()
+                                    inputs.addIfExists(Input()
                                       ..type = inputType
                                       ..key = _inputController.text
                                       ..content = _contentController.text);

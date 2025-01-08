@@ -21,7 +21,7 @@ class _LlmNodeWidgetState extends ConsumerState<LlmNodeWidget> {
     return GestureDetector(
       onDoubleTap: () async {
         Map<String, dynamic>? result =
-            await showNodeSettingDialog(context, widget.node);
+            await showNodeSettingDialog(context, widget.node, ref);
         if (result != null) {
           ref.read(workflowProvider.notifier).addData(widget.node.uuid, result);
           setState(() {
@@ -143,11 +143,23 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                 items: widget.availableModels
                     .map((item) => DropdownMenuItem<ModelInfo>(
                           value: item,
-                          child: Text(
-                            item.modelName,
-                            style: const TextStyle(
-                              fontSize: 14,
-                            ),
+                          child: Row(
+                            spacing: 10,
+                            children: [
+                              Text(
+                                item.modelName,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                softWrap: true,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SimpleTag(
+                                text: item.modelType.name,
+                              ),
+                              SimpleTag(text: item.modelFor.name)
+                            ],
                           ),
                         ))
                     .toList(),
