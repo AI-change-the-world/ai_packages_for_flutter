@@ -8,12 +8,10 @@ import 'enums.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
+// These functions are ignored (category: IgnoreBecauseExplicitAttribute): `exec`
 
 String dynamicPyCall({required PyCallObj pyCall}) =>
     RustLib.instance.api.crateApiPyCallDynamicPyCall(pyCall: pyCall);
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<PyResult < String >>>
-abstract class PyResultString implements RustOpaqueInterface {}
 
 /// example:
 /// ```python
@@ -34,11 +32,6 @@ class PyCallObj {
     required this.script,
     required this.args,
   });
-
-  Future<PyResultString> exec() =>
-      RustLib.instance.api.crateApiPyCallPyCallObjExec(
-        that: this,
-      );
 
   // HINT: Make it `#[frb(sync)]` to let it become the default constructor of Dart class.
   static Future<PyCallObj> newInstance(

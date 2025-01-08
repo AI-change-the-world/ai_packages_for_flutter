@@ -33,6 +33,7 @@ impl PyCallObj {
         }
     }
 
+    #[frb(ignore)]
     pub fn exec(&self) -> PyResult<String> {
         Ok(Python::with_gil(|py| {
             let c_str_script = std::ffi::CString::new(self.script.clone()).expect("cstr Error");
