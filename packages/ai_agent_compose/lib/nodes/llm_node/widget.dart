@@ -11,25 +11,26 @@ class LlmNodeWidget extends ConsumerStatefulWidget {
 class _LlmNodeWidgetState extends ConsumerState<LlmNodeWidget> {
   @override
   Widget build(BuildContext context) {
-    final l = ref.read(workflowProvider.notifier).getAllGlobalInputs();
-    if (widget.node.data?["globalInputs"] == null) {
-      widget.node.data = {"globalInputs": l};
-    } else {
-      widget.node.data!["globalInputs"] = l;
-    }
-
     return GestureDetector(
       onDoubleTap: () async {
+        final l = ref.read(workflowProvider.notifier).getAllGlobalInputs();
+        if (widget.node.data?["globalInputs"] == null) {
+          widget.node.data = {"globalInputs": l};
+        } else {
+          widget.node.data!["globalInputs"] = l;
+        }
         Map<String, dynamic>? result =
             await showNodeSettingDialog(context, widget.node, ref);
+        // print("result  ====> ${result}");
         if (result != null) {
           ref.read(workflowProvider.notifier).addData(widget.node.uuid, result);
-          setState(() {
-            widget.node.data!.addAll(result);
-            widget.node.nodeName = result["name"] ?? widget.node.nodeName;
-            widget.node.description =
-                result["description"] ?? widget.node.description;
-          });
+
+          widget.node.data ??= {};
+
+          widget.node.data!.addAll(result);
+          widget.node.nodeName = result["name"] ?? widget.node.nodeName;
+          widget.node.description =
+              result["description"] ?? widget.node.description;
         }
       },
       child: Container(
@@ -124,6 +125,10 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
               ),
               Text("3. 模型选择"),
               DropdownButtonFormField2<ModelInfo>(
+                value: selectedModel != ""
+                    ? widget.availableModels
+                        .firstWhere((v) => v.modelName == selectedModel)
+                    : null,
                 isExpanded: true,
                 decoration: InputDecoration(
                   isDense: true,
@@ -247,18 +252,14 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                                   SizedBox(
                                     width: 5,
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                      color: Colors.blueAccent,
-                                    ),
-                                    child: Text(
-                                      "全局变量",
-                                      style: TextStyle(color: Colors.white),
-                                    ),
-                                  ),
-                                  Text(s),
+                                  SimpleTag(text: "全局变量"),
+                                  Expanded(
+                                      child: Text(
+                                    s,
+                                    maxLines: 1,
+                                    softWrap: true,
+                                    overflow: TextOverflow.ellipsis,
+                                  )),
                                 ],
                               ),
                             );

@@ -10,16 +10,40 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 ///  {"uuid" : {"node":buildName,"data":{"inputs":[],"output":[]}} ,"global" :{"uuid":"output"} }
 typedef Context = Map<String, dynamic>;
 
+class GraphExcuteState {
+  final Context nodesInfo;
+  final Context global;
+
+  const GraphExcuteState({this.nodesInfo = const {}, this.global = const {}});
+
+  GraphExcuteState copyWith({
+    Context? nodesInfo,
+    Context? global,
+  }) {
+    return GraphExcuteState(
+      nodesInfo: nodesInfo ?? this.nodesInfo,
+      global: global ?? this.global,
+    );
+  }
+
+  @override
+  String toString() {
+    return 'GraphExcuteState(nodesInfo: $nodesInfo, global: $global)';
+  }
+}
+
 class WorkflowState {
-  final Context context;
+  final GraphExcuteState context;
   final INode? current;
   List<ModelInfo> models;
 
   WorkflowState(
-      {this.context = const {}, this.current, this.models = const []});
+      {this.context = const GraphExcuteState(),
+      this.current,
+      this.models = const []});
 
   WorkflowState copyWith({
-    Context? context,
+    GraphExcuteState? context,
     INode? current,
     List<ModelInfo>? models,
   }) {
@@ -58,15 +82,15 @@ class WorkflowNotifier extends Notifier<WorkflowState> {
   }
 
   Map<String, dynamic> getGlobal() {
-    return state.context["global"] as Map<String, dynamic>;
+    return state.context.global;
   }
 
   List<String> getSimilar(String c) {
-    if (state.context.isEmpty) {
+    if (state.context.nodesInfo.isEmpty) {
       return [];
     }
     List<String> result = [];
-    for (final d in state.context.values) {
+    for (final d in state.context.nodesInfo.values) {
       if (d['node'] == "BeginNode") {
         result.addAll((d['inputs'] as List<Map<String, dynamic>>)
             .map((e) => e['key'] as String)
@@ -79,17 +103,19 @@ class WorkflowNotifier extends Notifier<WorkflowState> {
   }
 
   List<String> getAllGlobalInputs() {
-    if (state.context.isEmpty) {
+    if (state.context.nodesInfo.isEmpty) {
       return [];
     }
     List<String> result = [];
-    for (final d in state.context.values) {
+    for (final d in state.context.nodesInfo.values) {
       if (d['node'] == "BeginNode") {
         result.addAll((d['inputs'] as List<Map<String, dynamic>>)
             .map((e) => e['key'] as String)
             .toList());
       } else {
-        result.add((d['output'] as String));
+        if (d['output'] != null) {
+          result.add((d['output'] as String));
+        }
       }
     }
 
@@ -97,18 +123,18 @@ class WorkflowNotifier extends Notifier<WorkflowState> {
   }
 
   void addData(String uuid, Map<String, dynamic> data) {
-    state = state.copyWith(context: {...state.context, uuid: data});
+    final context = state.context
+        .copyWith(nodesInfo: {...state.context.nodesInfo, uuid: data});
+
+    state = state.copyWith(context: context);
+    debugPrint("context: ${state.context}");
   }
 
   void addToGlobal(String key, String value) {
-    state = state.copyWith(context: {
-      ...state.context,
-      "global": {
-        ...(state.context["global"] ?? <String, dynamic>{})
-            as Map<String, dynamic>,
-        key: value,
-      }
-    });
+    final context =
+        state.context.copyWith(global: {...state.context.global, key: value});
+
+    state = state.copyWith(context: context);
   }
 
   changeCurrentNode(INode? node) {
@@ -128,6 +154,11 @@ class WorkflowNotifier extends Notifier<WorkflowState> {
                 .length ==
             1 ||
         controller.state.value.data.isEmpty;
+  }
+
+  void clearGlobal() {
+    final context = state.context.copyWith(global: {});
+    state = state.copyWith(context: context);
   }
 }
 

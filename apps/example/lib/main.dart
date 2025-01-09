@@ -42,50 +42,74 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyApp2 extends StatelessWidget {
+class MyApp2 extends StatefulWidget {
   const MyApp2({super.key});
 
-  Future<Map<String, String>> loadConfig() async {
+  @override
+  State<MyApp2> createState() => _MyApp2State();
+}
+
+class _MyApp2State extends State<MyApp2> {
+  late Map<String, dynamic> config = {};
+
+  Future loadConfig() async {
     try {
-      // 读取 JSON 文件内容
       final String response = await rootBundle.loadString('assets/config.json');
-      // 解析 JSON 数据
-      final data = jsonDecode(response);
-      return data;
+      debugPrint("response ====> $response");
+      setState(() {
+        config = jsonDecode(response);
+      });
     } catch (e) {
-      return {};
+      debugPrint("Error loading config: $e");
     }
+  }
+
+  late Future<void> future;
+
+  @override
+  void initState() {
+    super.initState();
+    future = loadConfig();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: FutureBuilder(
-          future: loadConfig(),
-          builder: (c, s) {
-            if (s.hasData) {
-              final data = s.data as Map<String, String>;
-              String sk = data['llm-sk'] ?? "";
-              String model = data['llm-model-name'] ?? "";
-              String baseUrl = data['llm-base'] ?? "";
-              OpenAIInfo openAIInfo = OpenAIInfo(baseUrl, sk, model);
-              ModelInfo modelInfo = ModelInfo(
-                ModelType.openai,
-                ModelFor.nlp,
-                "default",
-                openAIInfo,
+    return Scaffold(
+      body: FutureBuilder(
+        future: future,
+        builder: (c, s) {
+          if (s.connectionState == ConnectionState.done) {
+            if (config.isEmpty || !config.containsKey('llm-sk')) {
+              return Scaffold(
+                body: Center(child: Text('Configuration data is missing!')),
               );
-              return AgentComposer(
-                models: [modelInfo],
-              );
-            } else {
-              return Scaffold();
             }
-          }),
+            String sk = config['llm-sk']!;
+            String model = config['llm-model-name']!;
+            String baseUrl = config['llm-base']!;
+            OpenAIInfo openAIInfo = OpenAIInfo(baseUrl, sk, model);
+            ModelInfo modelInfo = ModelInfo(
+              ModelType.openai,
+              ModelFor.nlp,
+              "default",
+              openAIInfo,
+            );
+            return AgentComposer(
+              models: [modelInfo],
+            );
+          } else {
+            return Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+        },
+      ),
     );
   }
 }
 
 void main() {
-  runApp(const MyApp2());
+  runApp(MaterialApp(
+    home: MyApp2(),
+  ));
 }

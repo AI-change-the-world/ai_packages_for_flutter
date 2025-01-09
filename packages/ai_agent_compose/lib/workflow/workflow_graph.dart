@@ -1,6 +1,8 @@
+import 'package:ai_agent_compose/models/openai_model_info.dart';
 import 'package:ai_agent_compose/nodes/begin_node/begin_node.dart';
 import 'package:ai_agent_compose/nodes/llm_node/llm_node.dart';
 import 'package:ai_agent_compose/workflow/workflow_notifier.dart';
+import 'package:ai_packages_core/ai_packages_core.dart';
 import 'package:flow_compose/flow_compose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,13 +33,29 @@ extension Excuter on INode {
     }
 
     if (this is LlmNode) {
-      print("data?['prompt']  ${data?['prompt']}");
+      // print("data?['prompt']  ${data?['prompt']}");
       final prompt = ((data?['prompt'] ?? "") as String)
           .formatWithMap(ref.read(workflowProvider.notifier).getGlobal());
-      print("prompt  ${prompt}");
+      // print("prompt  ${prompt}");
+      final model = ref
+          .read(workflowProvider)
+          .models
+          .firstWhere((v) => v.modelName == data?['model']);
+      if (model.info is OpenAIInfo) {
+        ChatMessage message = ChatMessage(
+          role: "user",
+          content: prompt,
+          createAt: DateTime.now().millisecondsSinceEpoch,
+        );
+        // await model.info.chat([message]).then((v) {
+        //   debugPrint("answer $v");
+        // });
+        model.info.streamChat([message]).listen((v) {
+          debugPrint("answer $v");
+        });
+      }
     }
 
-    await Future.delayed(Duration(seconds: 3));
     debugPrint('Node executed done: ${ref.read(workflowProvider).context}');
   }
 }
@@ -66,6 +84,9 @@ class WorkflowGraph {
   }
 
   void executeWorkflow(WidgetRef ref) async {
+    // 先清空Context
+    ref.read(workflowProvider.notifier).clearGlobal();
+
     // 拓扑排序
     final executionOrder = _topologicalSort();
     debugPrint('Execution order: $executionOrder');

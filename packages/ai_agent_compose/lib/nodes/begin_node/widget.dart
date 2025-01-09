@@ -18,6 +18,7 @@ class _BeginNodeWidgetState extends ConsumerState<BeginNodeWidget> {
         if (d != null) {
           ref.read(workflowProvider.notifier).addData(widget.node.uuid, d);
           widget.node.data = d;
+          setState(() {});
         }
       },
       child: Container(

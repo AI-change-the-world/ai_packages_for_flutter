@@ -46,7 +46,8 @@ class __ComposerState extends ConsumerState<_Composer> {
         InfiniteDrawingBoard(
           controller: controller,
         ),
-        if (ref.watch(workflowProvider.select((c) => c.context.isNotEmpty)))
+        if (ref.watch(
+            workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
           Positioned(
             right: 20,
             top: 20,
@@ -74,7 +75,8 @@ class __ComposerState extends ConsumerState<_Composer> {
               ),
             ),
           ),
-        if (ref.watch(workflowProvider.select((c) => c.context.isNotEmpty)))
+        if (ref.watch(
+            workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
           Positioned(
             right: 20,
             top: 70,
