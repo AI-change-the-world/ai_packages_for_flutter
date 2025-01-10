@@ -71,7 +71,7 @@ class _BeginNodeConfigWidgetState extends State<BeginNodeConfigWidget> {
       .toList();
 
   // ignore: avoid_init_to_null
-  InputType? inputType = null;
+  InputType? inputType = InputType.text;
 
   @override
   void dispose() {

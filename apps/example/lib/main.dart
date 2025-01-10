@@ -55,7 +55,6 @@ class _MyApp2State extends State<MyApp2> {
   Future loadConfig() async {
     try {
       final String response = await rootBundle.loadString('assets/config.json');
-      debugPrint("response ====> $response");
       setState(() {
         config = jsonDecode(response);
       });
@@ -94,6 +93,7 @@ class _MyApp2State extends State<MyApp2> {
               "default",
               openAIInfo,
             );
+            debugPrint("modelInfo ====> ${modelInfo.modelName}");
             return AgentComposer(
               models: [modelInfo],
             );

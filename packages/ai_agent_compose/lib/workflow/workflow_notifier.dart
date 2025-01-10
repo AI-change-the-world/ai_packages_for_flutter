@@ -36,21 +36,25 @@ class WorkflowState {
   final GraphExcuteState context;
   final INode? current;
   List<ModelInfo> models;
+  final bool isWorkflowRunning;
 
   WorkflowState(
       {this.context = const GraphExcuteState(),
       this.current,
-      this.models = const []});
+      this.models = const [],
+      this.isWorkflowRunning = false});
 
   WorkflowState copyWith({
     GraphExcuteState? context,
     INode? current,
     List<ModelInfo>? models,
+    bool? isWorkflowRunning,
   }) {
     return WorkflowState(
       context: context ?? this.context,
       current: current,
       models: models ?? this.models,
+      isWorkflowRunning: isWorkflowRunning ?? this.isWorkflowRunning,
     );
   }
 }
@@ -71,7 +75,16 @@ class WorkflowNotifier extends Notifier<WorkflowState> {
     state.models = models;
   }
 
+  changeRunningState(bool isWorkflowRunning) {
+    state = state.copyWith(isWorkflowRunning: isWorkflowRunning);
+  }
+
   Future excute({String? thisJobUniqueId, required WidgetRef ref_}) async {
+    if (state.isWorkflowRunning) {
+      return;
+    }
+    state = state.copyWith(isWorkflowRunning: true);
+    debugPrint("state.isWorkflowRunning  ${state.isWorkflowRunning}");
     WorkflowGraph workflowGraph = WorkflowGraph(
         controller.state.value.data, controller.state.value.edges.toList());
     workflowGraph.executeWorkflow(ref_);

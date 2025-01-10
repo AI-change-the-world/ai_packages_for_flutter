@@ -336,6 +336,10 @@ class _LlmNodeSettingsWidgetState extends State<LlmNodeSettingsWidget> {
                     ),
                   ),
                   onPressed: () {
+                    if (selectedModel == "") {
+                      return;
+                    }
+
                     if (inputs.isNotEmpty) {
                       final r = PromptUtils.multiplePromptValidator(
                           _promptController.text, inputs);

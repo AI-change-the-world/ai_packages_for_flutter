@@ -5,6 +5,7 @@ import 'package:flow_compose/flow_compose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'workflow/running_widget.dart';
 import 'workflow/workflow_notifier.dart';
 export './models/openai_model_info.dart';
 
@@ -40,68 +41,90 @@ class __ComposerState extends ConsumerState<_Composer> {
 
   @override
   Widget build(BuildContext context) {
+    bool isRunning =
+        ref.watch(workflowProvider.select((c) => c.isWorkflowRunning));
+
+    debugPrint("isRunning   $isRunning");
+
     return Scaffold(
-        body: Stack(
+        body: Column(
       children: [
-        InfiniteDrawingBoard(
-          controller: controller,
-        ),
-        if (ref.watch(
-            workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
-          Positioned(
-            right: 20,
-            top: 20,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.greenAccent,
-                backgroundColor: Colors.greenAccent.shade700,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                if (ref.read(workflowProvider.notifier).couldSave()) {
-                  print(controller.dumpToString());
-                }
-              },
-              child: SizedBox(
-                width: 80,
-                child: Center(
-                  child: Text(
-                    '创建',
-                    style: TextStyle(color: Colors.white),
+        Expanded(
+            child: Stack(
+          children: [
+            InfiniteDrawingBoard(
+              controller: controller,
+            ),
+            if (ref.watch(
+                workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
+              Positioned(
+                right: 20,
+                top: 20,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.greenAccent,
+                    backgroundColor: Colors.greenAccent.shade700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    if (ref.read(workflowProvider.notifier).couldSave()) {
+                      print(controller.dumpToString());
+                    }
+                  },
+                  child: SizedBox(
+                    width: 80,
+                    child: Center(
+                      child: Text(
+                        '创建',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ),
-        if (ref.watch(
-            workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
-          Positioned(
-            right: 20,
-            top: 70,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.blueAccent,
-                backgroundColor: Colors.blueAccent.shade700,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                ref.read(workflowProvider.notifier).excute(ref_: ref);
-              },
-              child: SizedBox(
-                width: 80,
-                child: Center(
-                  child: Text(
-                    '试运行',
-                    style: TextStyle(color: Colors.white),
+            if (ref.watch(
+                workflowProvider.select((c) => c.context.nodesInfo.isNotEmpty)))
+              Positioned(
+                right: 20,
+                top: 70,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.blueAccent,
+                    backgroundColor: Colors.blueAccent.shade700,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  onPressed: () {
+                    ref.read(workflowProvider.notifier).excute(ref_: ref);
+                    setState(() {
+                      isRunning = true;
+                    });
+                  },
+                  child: SizedBox(
+                    width: 80,
+                    child: Center(
+                      child: Text(
+                        '试运行',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-          )
+              )
+          ],
+        )),
+        AnimatedContainer(
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.horizontal(
+                  left: Radius.circular(8), right: Radius.circular(8))),
+          duration: Duration(milliseconds: 300),
+          height: isRunning ? 500 : 0,
+          child: RunningListWidget(),
+        )
       ],
     ));
   }
