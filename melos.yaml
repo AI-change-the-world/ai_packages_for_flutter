@@ -1,7 +1,10 @@
 name: ai_packages_for_flutter
 
 packages:
-  - packages/**
+  - packages/ai_agent_compose
+  - packages/ai_packages_core
+  - packages/ai_storage
+  - packages/ai_ui
   - apps/**
 
 scripts:

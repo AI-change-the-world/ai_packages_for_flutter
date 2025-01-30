@@ -1,6 +1,6 @@
 name: ai_packages_core
 description: "core of these project."
-version: 0.0.1
+version: 0.0.1+1
 homepage: https://github.com/AI-change-the-world/ai_packages_for_flutter
 
 environment:
